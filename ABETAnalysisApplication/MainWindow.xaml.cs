@@ -16,15 +16,24 @@ using System.Windows.Shapes;
 
 namespace ABETAnalysisApplication
 {
+
+    /**
+     * TODO: Make this into a MVVM program so that functional 
+     * programming is not imposted on this program that cannot be 
+     * functional without being absolute cancer.
+     * 
+     * This is a terrible program right now. 
+     */
+     
     /// <summary>
-    /// Interaction logic for MainWindow.xaml
+    /// Interaction logic for MainWindow.xaml and file path parsing to create complementary pairs of pre-semester and post-semester survey result csv files
     /// </summary>
     public partial class MainWindow : Window
     {
 
         bool preFilesDropped = false;
-        LinkedList<String> preFilePaths;
-        LinkedList<String> postFilePaths;
+        List<String> preFilePaths = new List<string>();
+        List<String> postFilePaths = new List<string>();
         Label dropInstructions = new Label();
         public MainWindow()
         {
@@ -52,41 +61,94 @@ namespace ABETAnalysisApplication
             // TODO: verify that the csv files also have a course number associated with them
             string[] files = (string[])evArgs.Data.GetData(DataFormats.FileDrop);
 
-            LinkedList<String> csvFiles = new LinkedList<string>();
-            LinkedList<String> nonCsvFiles = new LinkedList<string>();
+            List<String> nonCsvFiles = new List<string>();
             foreach (string file in files)
             {
-                if (System.IO.Path.HasExtension(file) && System.IO.Path.GetExtension(file).Equals("csv"))
+                Console.WriteLine(file);
+                if (System.IO.Path.HasExtension(file) && System.IO.Path.GetExtension(file).Equals(".csv"))
                 {
-                    csvFiles.AddLast(file);
-                }else
+                    Console.WriteLine(file + " is valid csv file path");
+                    if (!preFilesDropped)
+                    {
+                        preFilePaths.Add(file);
+                    }
+                    else
+                    {
+                        postFilePaths.Add(file);
+                    }
+
+                }
+                else
                 {
-                    nonCsvFiles.AddLast(file);
+                    nonCsvFiles.Add(file);
                 }
                
             }
 
-
-
-            if (!preFilesDropped)
+            // Log the invalid files to the console
+            Console.WriteLine("Invalid Files:");
+            if (nonCsvFiles.Count == 0)
             {
-                preFilePaths = csvFiles;
-                dropInstructions.Content = "Drag and Drop Post-SemesterSurvey Files";
-                preFilesDropped = true;
+                Console.WriteLine("None");
             }
             else
             {
-                postFilePaths = csvFiles;
-
-                validateFilePairs(preFilePaths, postFilePaths);
+                foreach (string file in nonCsvFiles)
+                {
+                    Console.WriteLine(file);
+                }
             }
+
+            // if post files need to be dropped do that
+            // else check the entered file paths and parse them for analysis
+            if (!preFilesDropped)
+            {
+                preFilesDropped = true;
+                dropInstructions.Content = "Drag and Drop Post-SemesterSurvey Files";
+
+            }
+            else
+            {
+                validateFilePairs();
+
+            }
+
+            
         }
 
-        private void validateFilePairs(LinkedList<String> preFilePaths, LinkedList<String> postFilePaths)
+        private void validateFilePairs()
         {
-            // TODO: Find files based on the course number associated with the survey
-            // that are present in both the preFile set and the postFile set
-            
+
+            Console.WriteLine("Validation | Number of pre files: " + preFilePaths.Count);
+            Console.WriteLine("Validation | Number of post files: " + postFilePaths.Count);
+
+            List<string> singletonFiles = new List<string>();
+            List<PathPair> pathPairs = new List<PathPair>();
+
+            for(int i = 0; i < preFilePaths.Count; i++)
+            {
+                int preFileIndex = i;
+                int postFileIndex = postFilePaths.IndexOf(preFilePaths.ElementAt(preFileIndex));
+
+                // postFileIndex = -1 when not in postFilePaths list
+                if(postFileIndex < 0)
+                {
+                    singletonFiles.Add(preFilePaths.ElementAt(preFileIndex));
+                    break;
+                }
+
+                pathPairs.Add(new PathPair(preFilePaths.ElementAt(preFileIndex), postFilePaths.ElementAt(postFileIndex)));
+
+                postFilePaths.RemoveAt(postFileIndex);
+
+            }
+
+            Console.WriteLine("Done");
+
+            foreach(PathPair pair in pathPairs)
+            {
+                Console.WriteLine("Pair | Pre File: " + pair.prePath + " -- Post File: " + pair.postPath);
+            }
         }
 
 
