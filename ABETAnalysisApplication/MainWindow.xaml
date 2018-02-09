@@ -6,5 +6,7 @@
         xmlns:local="clr-namespace:ABETAnalysisApplication"
         mc:Ignorable="d"
         Title="MainWindow" Height="350" Width="525">
-    <Grid Name="MainPanel" Height="200" Width="300" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+    <Grid Name="MainPanel" Height="200" Width="300" HorizontalAlignment="Center" VerticalAlignment="Center">
+        <Label Name="DropInstructions" HorizontalAlignment="Center" VerticalAlignment="Center" Content="Text"/>
+    </Grid>
 </Window>
